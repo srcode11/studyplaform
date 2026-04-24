@@ -1,65 +1,9 @@
-const express = require('express');
-const mongoose = require('mongoose');
-require('dotenv').config();
+// استخدم المنفذ الذي يوفره بيئة التشغيل (مثل Render) أو المنفذ 5001 بشكل افتراضي
+const PORT = process.env.PORT || 5001;
 
-const app = express();
-app.use(express.json());
-
-// ========== Test Route ==========
-app.get('/', (req, res) => {
-  res.json({ message: 'API is working ✅' });
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+}).on('error', (err) => {
+  console.error("❌ Server failed to start:", err);
+  process.exit(1); // أخرج من العملية مع إشارة خطأ
 });
-
-// ========== Routes ==========
-app.use('/api/subjects', require('./routes/subjects'));
-app.use('/api/questions', require('./routes/questions'));
-app.use('/api/progress', require('./routes/progress'));
-app.use('/api/ai', require('./routes/ai'));  // Route للـ AI
-
-// ========== Seed Default Subjects ==========
-const seedSubjects = async () => {
-  try {
-    const Subject = mongoose.model('Subject');
-    const count = await Subject.countDocuments();
-    
-    if (count === 0) {
-      const subjects = [
-        { name: 'Mathematics', description: 'Algebra, Calculus, Geometry' },
-        { name: 'Physics', description: 'Mechanics, Electricity, Waves' },
-        { name: 'Computer Science', description: 'Programming, Algorithms, Data Structures' },
-        { name: 'English', description: 'Grammar, Literature, Writing' },
-        { name: 'Chemistry', description: 'Organic, Inorganic, Physical' }
-      ];
-      
-      await Subject.insertMany(subjects);
-      console.log('✅ Default subjects added');
-    }
-  } catch (err) {
-    console.log('⚠️ Seed error:', err.message);
-  }
-};
-
-// ========== Connect to MongoDB ==========
-mongoose.connect(process.env.MONGO_URI)
-  .then(async () => {
-    console.log('✅ MongoDB connected');
-    
-    // Load models
-    require('./models/User');
-    require('./models/Subject');
-    require('./models/Question');
-    require('./models/Progress');
-    
-    // Add default subjects
-    await seedSubjects();
-    
-    // Start server
-    const PORT = process.env.PORT || 5001;
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
-    process.exit(1);
-  });
