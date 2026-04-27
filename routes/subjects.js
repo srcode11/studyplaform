@@ -12,10 +12,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET single subject
+// GET single subject by name (e.g. MT101)
 router.get('/:id', async (req, res) => {
   try {
-    const subject = await Subject.findById(req.params.id);
+    const subject = await Subject.findOne({ name: req.params.id });
     if (!subject) return res.status(404).json({ error: 'Subject not found' });
     res.json(subject);
   } catch (err) {
